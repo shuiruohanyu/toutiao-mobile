@@ -5,6 +5,7 @@
       fixed
       title="黑马头条"
       right-text="搜索"
+      @click-right="$router.push('/search')"
     />
      <!-- 二级路由容器 -->
      <div class='my-wrapper' :class="{ noTop: path === '/user' }"
