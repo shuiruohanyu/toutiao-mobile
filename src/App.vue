@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <p >123456</p>
+<van-button type="primary">主要按钮</van-button>
     <!-- 放置一个容器 -->
     <router-view />
   </div>
