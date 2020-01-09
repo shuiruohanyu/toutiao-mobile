@@ -4,7 +4,7 @@ import router from './router'
 import store from './store'
 import '@/permission'
 import Vant from 'vant'
-import 'vant/lib/index.css'
+import 'vant/lib/index.less' // 引入less文件
 import '@/styles/index.less'
 import 'amfe-flexible' // 引入动态设置的值
 Vue.config.productionTip = false
