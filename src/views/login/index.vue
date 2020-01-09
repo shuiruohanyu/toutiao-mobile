@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { login } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -28,6 +30,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updateUser']),
     checkMobile () {
       if (!this.loginForm.mobile) {
         this.errorMessage.mobile = '手机号不能为空'
@@ -51,12 +54,18 @@ export default {
       return true
     },
     // 调用登录方法
-    login () {
+    async  login () {
       let Mobile = this.checkMobile() // 检查手机号
       let Code = this.checkCode() // 检查验证码
       if (Mobile && Code) {
+        try {
         // 如果一切OK  调用登录接口换取token
-        console.log('验证OK')
+          const data = await login(this.loginForm)
+          this.$notify({ type: 'success', message: '登录成功' })
+          this.updateUser({ user: data }) // 通过vuex更新数据 并写入缓存
+        } catch (error) {
+          this.$notify({ type: 'danger', message: '登录失败' })
+        }
       }
     }
   }
