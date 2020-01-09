@@ -1,5 +1,5 @@
-import router from './router'
-import store from './store'
+import router from '@/router'
+import store from '@/store'
 router.beforeEach(function (to, form, next) {
   if (to.path.startsWith('/user') && !store.state.user.token) {
     //   没有token强制跳转到 登录页
