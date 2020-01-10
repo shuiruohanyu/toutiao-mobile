@@ -1,5 +1,5 @@
 <template>
-  <van-action-sheet :round="false" :value="value" @input="$emit('input',$event)" title="频道编辑">
+  <van-action-sheet :round="false" :value="value" @input="$emit('input',$event)" title="频道编辑" @closed="editing = false">
     <div class="channel">
       <div class="tit">
         我的频道：
@@ -8,9 +8,9 @@
         <van-button v-else @click="editing=false" size="mini" type="danger" plain>完成</van-button>
       </div>
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="index in 8" :key="index">
-          <span class="f12">频道{{index}}</span>
-          <van-icon v-show="editing" class="btn" name="cross"></van-icon>
+        <van-grid-item v-for="(channel,i) in channels" :key="channel.id">
+          <span class="f12" :class="{red: i === activeIndex}">{{ channel.name }}</span>
+          <van-icon  v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -23,6 +23,15 @@ export default {
     value: {
       default: false,
       type: Boolean
+    },
+    channels: {
+      default: () => [], // 默认值
+      type: Array
+    },
+    // 激活频道索引
+    activeIndex: {
+      type: Number,
+      default: 0
     }
   },
   data () {
