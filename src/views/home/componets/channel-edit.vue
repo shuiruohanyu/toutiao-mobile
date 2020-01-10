@@ -1,5 +1,11 @@
 <template>
-  <van-action-sheet :round="false" :value="value" @input="$emit('input',$event)" title="频道编辑" @closed="editing = false">
+  <van-action-sheet
+    :round="false"
+    :value="value"
+    @input="$emit('input',$event)"
+    title="频道编辑"
+    @closed="editing = false"
+  >
     <div class="channel">
       <div class="tit">
         我的频道：
@@ -10,7 +16,17 @@
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="(channel,i) in channels" :key="channel.id">
           <span class="f12" :class="{red: i === activeIndex}">{{ channel.name }}</span>
-          <van-icon  v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
+          <van-icon v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
+        </van-grid-item>
+      </van-grid>
+    </div>
+    <!--可选频道  -->
+    <div class="channel">
+      <div class="tit">可选频道：</div>
+      <van-grid class="van-hairline--left">
+        <van-grid-item v-for="channel in optionalChannels" :key="channel.id">
+          <span class="f12">{{channel.name }}</span>
+          <van-icon class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -18,6 +34,7 @@
 </template>
 
 <script>
+import { getChannels } from '@/api/channels'
 export default {
   props: {
     value: {
@@ -36,8 +53,24 @@ export default {
   },
   data () {
     return {
-      editing: false
+      editing: false,
+      allChannels: []
     }
+  },
+  computed: {
+    //   可选频道 =  全部频道 - 当前自己的频道
+    optionalChannels () {
+      return this.allChannels.filter(item => !this.channels.some(o => o.id === item.id))
+    }
+  },
+  methods: {
+    async getChannels () {
+      let data = await getChannels()
+      this.allChannels = data.channels
+    }
+  },
+  created () {
+    this.getChannels() // 获取所有可选频道
   }
 }
 </script>
@@ -56,7 +89,7 @@ export default {
 }
 .channel {
   padding: 10px;
-  .tit{
+  .tit {
     line-height: 3;
     .tip {
       font-size: 10px;
@@ -67,7 +100,7 @@ export default {
     float: right;
     margin-top: 7px;
   }
-  .btn{
+  .btn {
     position: absolute;
     bottom: 0;
     right: 0;
@@ -75,11 +108,11 @@ export default {
     font-size: 12px;
     color: #fff;
   }
-  .f12{
-      font-size:12px;
-      color: #555;
+  .f12 {
+    font-size: 12px;
+    color: #555;
   }
-  .red{
+  .red {
     color: red;
   }
 }
