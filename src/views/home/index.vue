@@ -1,16 +1,16 @@
 <template>
   <div class="container">
     <van-tabs swipeable>
-      <van-tab v-for="channel in channels" :title="channel.name" :key="channel.id">
+      <van-tab v-model="activeIndex" v-for="channel in channels" :title="channel.name" :key="channel.id">
         <div class="scroll-wrapper">
           <!-- 另外一个下拉刷新组件 -->
           <van-pull-refresh
-            v-model="downLoading"
+            v-model="activeChannel.downLoading"
             @refresh="onRefresh"
             :success-text="refreshSuccessText"
           >
-            <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
-              <van-cell v-for="(item,i) in articles" :key="i">
+            <van-list v-model="activeChannel.upLoading" :finished="activeChannel.finished" finished-text="没有更多了" @load="onLoad">
+              <van-cell v-for="article in activeChannel.articles" :key="article.id">
                 <div class="article_item">
                   <h3 class="van-ellipsis">PullRefresh下拉刷新PullRefresh下拉刷新下拉刷新下拉刷新</h3>
                   <div class="img_box">
@@ -45,48 +45,60 @@
 
 <script>
 import { getMyChannels } from '@/api/channels'
+import { getArticles } from '@/api/article'
 export default {
   data () {
     return {
       refreshSuccessText: null, // 更新成功之后的文本
-      channels: [] // 定义频道数据
+      channels: [], // 定义频道数据
+      activeIndex: 0 // 默认激活第一个
     }
   },
   methods: {
     // 上拉加载数据
-    onLoad () {
-      if (this.articles.length < 50) {
-        setTimeout(() => {
-          this.articles = [
-            ...this.articles,
-            ...Array.from(
-              Array(10),
-              (value, index) => index + 1 + this.articles.length
-            )
-          ]
-          this.loading = false // 结束下拉
-        }, 2000)
+    async onLoad () {
+      // if (this.articles.length < 50) {
+      //   setTimeout(() => {
+      //     this.articles = [
+      //       ...this.articles,
+      //       ...Array.from(
+      //         Array(10),
+      //         (value, index) => index + 1 + this.articles.length
+      //       )
+      //     ]
+      //     this.loading = false // 结束下拉
+      //   }, 2000)
+      // } else {
+      //   this.finished = true // 加载完毕
+      // }
+      await this.$sleep() // 休眠300毫秒
+      let data = await getArticles({ timestamp: this.activeChannel.timestamp, channel_id: this.activeChannel.id })
+      this.activeChannel.articles.push(data) // 数据加入到文章列表中
+      this.activeChannel.upLoading = false // 结束下拉状态
+      if (!data.pre_timestamp) {
+        // 已经没有更多的历史数据了
+        this.activeChannel.finished = true
       } else {
-        this.finished = true // 加载完毕
+        this.activeChannel.timestamp = data.pre_timestamp // 保存下一页时间戳
       }
     },
     // 下拉刷新方法
     onRefresh () {
-      setTimeout(() => {
-        // this.$notify({ type: 'primary', message: '更新数据成功' })
-        // const data = [1, 2, 3, 4, 5]
-        const data = []
-        this.downLoading = false // 关掉下拉更新
-        if (data.length) {
-          this.articles = data
-          this.finished = false
-          this.refreshSuccessText = '更新成功'
-          // 防止数据不够 重新加载一次数据
-          this.onLoad()
-        } else {
-          this.refreshSuccessText = '暂无更新'
-        }
-      }, 1000)
+      // setTimeout(() => {
+      //   // this.$notify({ type: 'primary', message: '更新数据成功' })
+      //   // const data = [1, 2, 3, 4, 5]
+      //   const data = []
+      //   this.downLoading = false // 关掉下拉更新
+      //   if (data.length) {
+      //     this.articles = data
+      //     this.finished = false
+      //     this.refreshSuccessText = '更新成功'
+      //     // 防止数据不够 重新加载一次数据
+      //     this.onLoad()
+      //   } else {
+      //     this.refreshSuccessText = '暂无更新'
+      //   }
+      // }, 1000)
     },
     async getMyChannel () {
       // 数据结构 不满足 目前的结构体系 需要处理
@@ -101,6 +113,11 @@ export default {
         downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
         timestamp: Date.now() // 默认给最新的时间
       }))
+    }
+  },
+  computed: {
+    activeChannel () {
+      return this.channels[this.activeIndex] // 获取当前激活的频道
     }
   },
   created () {
