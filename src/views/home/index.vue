@@ -39,11 +39,13 @@
         </div>
       </van-tab>
     </van-tabs>
-    <span class="bar_btn">
+    <span class="bar_btn" @click="showChannelEdit=true">
       <van-icon name="wap-nav"></van-icon>
     </span>
     <!-- 给组件传入文章id -->
     <more-action @on-report="removeArticle" @on-dislikes="removeArticle" :articleId="articleId"  v-model="showMoreAction"></more-action>
+    <!-- 频道组件 -->
+    <channel-edit v-model="showChannelEdit"></channel-edit>
   </div>
 </template>
 
@@ -52,6 +54,8 @@ import { getMyChannels } from '@/api/channels'
 import { getArticles } from '@/api/article'
 import { mapState } from 'vuex'
 import MoreAction from './componets/more-action'
+import ChannelEdit from './componets/channel-edit'
+
 export default {
   data () {
     return {
@@ -59,11 +63,12 @@ export default {
       channels: [], // 定义频道数据
       activeIndex: 0, // 默认激活第一个
       showMoreAction: false, // 默认不显示
+      showChannelEdit: false, // 默认不显示频道
       articleId: null // 记录当前的文档id
     }
   },
   components: {
-    MoreAction
+    MoreAction, ChannelEdit
   },
   methods: {
     // 因为子组件讨厌了文章 所以这里 要删除掉数据
