@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <van-tabs swipeable>
-      <van-tab v-model="activeIndex" v-for="channel in channels" :title="channel.name" :key="channel.id">
+    <van-tabs v-model="activeIndex"  swipeable>
+      <van-tab v-for="channel in channels" :title="channel.name" :key="channel.id">
         <div class="scroll-wrapper">
           <!-- 另外一个下拉刷新组件 -->
           <van-pull-refresh
@@ -12,19 +12,19 @@
             <van-list v-model="activeChannel.upLoading" :finished="activeChannel.finished" finished-text="没有更多了" @load="onLoad">
               <van-cell v-for="article in activeChannel.articles" :key="article.id">
                 <div class="article_item">
-                  <h3 class="van-ellipsis">PullRefresh下拉刷新PullRefresh下拉刷新下拉刷新下拉刷新</h3>
-                  <div class="img_box">
-                    <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                    <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                    <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+                  <h3 class="van-ellipsis">{{ article.title }}</h3>
+                  <div class="img_box" v-if="article.cover.type === 3">
+                    <van-image class="w33" fit="cover" :src="article.cover.images[0]" />
+                    <van-image class="w33" fit="cover" :src="article.cover.images[1]" />
+                    <van-image class="w33" fit="cover" :src="article.cover.images[2]" />
                   </div>
-                  <div class="img_box">
-                    <van-image class="w100" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+                  <div class="img_box" v-if="article.cover.type === 1">
+                    <van-image class="w100" fit="cover" :src="article.cover.images[0]" />
                   </div>
                   <div class="info_box">
-                    <span>你像一阵风</span>
-                    <span>8评论</span>
-                    <span>10分钟前</span>
+                    <span>{{ article.aut_name }}</span>
+                    <span>{{ article.comm_count }}评论</span>
+                    <span>{{ article.pubdate }}</span>
                     <span class="close">
                       <van-icon name="cross"></van-icon>
                     </span>
@@ -73,7 +73,7 @@ export default {
       // }
       await this.$sleep() // 休眠300毫秒
       let data = await getArticles({ timestamp: this.activeChannel.timestamp, channel_id: this.activeChannel.id })
-      this.activeChannel.articles.push(data) // 数据加入到文章列表中
+      this.activeChannel.articles.push(...data.results) // 数据加入到文章列表中
       this.activeChannel.upLoading = false // 结束下拉状态
       if (!data.pre_timestamp) {
         // 已经没有更多的历史数据了
@@ -83,7 +83,21 @@ export default {
       }
     },
     // 下拉刷新方法
-    onRefresh () {
+    async  onRefresh () {
+      await this.$sleep() // 休眠300毫秒
+      // 下拉刷新实际要拉取最新的数据
+      this.activeChannel.timestamp = Date.now() // 最新的数据要用最新的时间戳
+      this.activeChannel.downLoading = false // 关掉 下拉状态
+      let data = await getArticles({ channel_id: this.activeChannel.id, timestamp: this.activeChannel.timestamp })
+      if (data.results.length) {
+        this.activeChannel.articles = data.results // 直接覆盖原来的数据
+        this.activeChannel.finished = false // 表示有下文
+        this.refreshSuccessText = '更新成功'
+        this.activeChannel.timestamp = data.pre_timestamp
+      } else {
+        // 如果没数据表示 表示没更新
+        this.refreshSuccessText = '暂无更新'
+      }
       // setTimeout(() => {
       //   // this.$notify({ type: 'primary', message: '更新数据成功' })
       //   // const data = [1, 2, 3, 4, 5]
