@@ -9,7 +9,7 @@
             @refresh="onRefresh"
             :success-text="refreshSuccessText"
           >
-            <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+            <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
               <van-cell v-for="(item,i) in articles" :key="i">
                 <div class="article_item">
                   <h3 class="van-ellipsis">PullRefresh下拉刷新PullRefresh下拉刷新下拉刷新下拉刷新</h3>
@@ -48,10 +48,6 @@ import { getMyChannels } from '@/api/channels'
 export default {
   data () {
     return {
-      loading: false, // 是否正在加载下一页
-      finished: false, // 是否已经完成加载
-      articles: [], // 文章列表
-      downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
       refreshSuccessText: null, // 更新成功之后的文本
       channels: [] // 定义频道数据
     }
@@ -93,8 +89,18 @@ export default {
       }, 1000)
     },
     async getMyChannel () {
+      // 数据结构 不满足 目前的结构体系 需要处理
+      // 有多少个频道就应该有多少个数据
       let result = await getMyChannels()
-      this.channels = result.channels
+      this.channels = result.channels.map(item => ({
+        id: item.id, // 原来的频道id 和名称
+        name: item.name,
+        upLoading: false, // 是否正在加载下一页
+        finished: false, // 是否已经完成加载
+        articles: [], // 文章列表
+        downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
+        timestamp: Date.now() // 默认给最新的时间
+      }))
     }
   },
   created () {
