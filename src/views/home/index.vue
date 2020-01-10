@@ -26,7 +26,7 @@
                     <span>{{ article.aut_name }}</span>
                     <span>{{ article.comm_count }}评论</span>
                     <span>{{ article.pubdate | relTime }}</span>
-                    <span class="close">
+                    <span v-if="user.token" class="close" @click.stop="openMoreAction">
                       <van-icon name="cross"></van-icon>
                     </span>
                   </div>
@@ -41,6 +41,7 @@
     <span class="bar_btn">
       <van-icon name="wap-nav"></van-icon>
     </span>
+    <more-action  v-model="showMoreAction"></more-action>
   </div>
 </template>
 
@@ -48,15 +49,23 @@
 import { getMyChannels } from '@/api/channels'
 import { getArticles } from '@/api/article'
 import { mapState } from 'vuex'
+import MoreAction from './componets/more-action'
 export default {
   data () {
     return {
       refreshSuccessText: null, // 更新成功之后的文本
       channels: [], // 定义频道数据
-      activeIndex: 0 // 默认激活第一个
+      activeIndex: 0, // 默认激活第一个
+      showMoreAction: false // 默认不显示
     }
   },
+  components: {
+    MoreAction
+  },
   methods: {
+    openMoreAction () {
+      this.showMoreAction = true // 打开遮罩层
+    },
     // 上拉加载数据
     async onLoad () {
       // if (this.articles.length < 50) {
