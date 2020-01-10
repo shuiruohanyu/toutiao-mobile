@@ -29,6 +29,29 @@ export function getMyChannels () {
     }
   })
 }
+// 删除频道API
+export function delChannel (id) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      if (store.state.user.token) {
+        // 有登录的情况下直接调用删除接口
+        await request({
+          url: '/user/channels/' + id,
+          method: 'delete'
+        })
+        resolve() // 成功
+      } else {
+        // 没登录  删除的时候本地肯定已经有了
+        let str = localStorage.getItem(CHANNELS_KEY) // 获取本地的频道数据
+        let result = JSON.parse(str)
+        localStorage.setItem(CHANNELS_KEY, JSON.stringify(result.filter(item => item.id !== id)))
+        resolve()
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 // 获取所有频道
 
 export function getChannels () {
