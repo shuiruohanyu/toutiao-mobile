@@ -29,7 +29,7 @@ const routes = [
   { path: '/login', name: 'login', component: Login },
   { path: '/search', name: 'search', component: Search },
   { path: '/search/result', name: 'search-result', component: SearchResult },
-  { path: '/article', name: 'article', component: Article }
+  { path: '/article/:id', name: 'article', component: Article }
   // {
   //   path: '/about',
   //   name: 'about',

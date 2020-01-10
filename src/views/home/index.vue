@@ -10,7 +10,7 @@
             :success-text="refreshSuccessText"
           >
             <van-list v-model="activeChannel.upLoading" :finished="activeChannel.finished" finished-text="没有更多了" @load="onLoad">
-              <van-cell v-for="article in activeChannel.articles" :key="article.id">
+              <van-cell :to="'/article/'+ article.art_id.toString()" v-for="article in activeChannel.articles" :key="article.id">
                 <div class="article_item">
                   <h3 class="van-ellipsis">{{ article.title }}</h3>
                   <div class="img_box" v-if="article.cover.type === 3">
