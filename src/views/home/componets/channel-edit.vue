@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { getChannels, delChannel } from '@/api/channels'
+import { getChannels, delChannel, addChannel } from '@/api/channels'
 export default {
   props: {
     value: {
@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     // 添加频道数据
-    addChannel (channel) {
+    async  addChannel (channel) {
       // 调用封装好的Api (支持两种方式)
       // 后端数据格式
       // 后端：对应频道是有排序的，｛频道1，序号 3｝｛频道2，序号 1｝
@@ -84,6 +84,29 @@ export default {
       }))
       newChannels.splice(0, 1) // 删除第一个
       newChannels.push({ ...channel, seq: newChannels.length + 1 })
+      try {
+        await addChannel({ channels: newChannels })
+        this.$notify({
+          type: 'success',
+          message: '操作成功'
+        })
+        // 2.1 注意：频道编辑  文章列表 都有频道。 但是 复杂数据类型，没有修改引用地址，允许修改
+        this.channels.push({
+          id: channel.id,
+          name: channel.name,
+          upLoading: false, // 是否正在加载下一页
+          finished: false, // 是否已经完成加载
+          articles: [], // 文章列表
+          downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
+          timestamp: Date.now(), // 默认给最新的时间
+          scrollTop: 0 // 滚动条的位置
+        })
+      } catch (error) {
+        this.$notify({
+          type: 'danger',
+          message: '操作失败'
+        })
+      }
     },
     // 删除频道
     async delChannel (index, id) {
@@ -108,7 +131,7 @@ export default {
         this.channels.splice(index, 1)
       } catch (error) {
         this.$notify({
-          type: 'success',
+          type: 'danger',
           message: '操作失败'
         })
       }
