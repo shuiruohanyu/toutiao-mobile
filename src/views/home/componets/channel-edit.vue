@@ -15,7 +15,7 @@
       </div>
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="(channel,i) in channels" :key="channel.id">
-          <span class="f12" :class="{red: i === activeIndex}">{{ channel.name }}</span>
+          <span @click="enterChannel(i)" class="f12" :class="{red: i === activeIndex}">{{ channel.name }}</span>
           <van-icon v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
@@ -67,6 +67,14 @@ export default {
     async getChannels () {
       let data = await getChannels()
       this.allChannels = data.channels
+    },
+    // 进入我的频道
+    enterChannel (index) {
+      // 关闭
+      this.$emit('input', false) // 触发一个关闭事件
+      // 还要告诉父组件 => 切换到对应的索引下
+      //   this.$emit('update', index) // 给父组件 传值
+      this.$emit('update:activeIndex', index)
     }
   },
   created () {

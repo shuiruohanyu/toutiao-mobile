@@ -45,7 +45,11 @@
     <!-- 给组件传入文章id -->
     <more-action @on-report="removeArticle" @on-dislikes="removeArticle" :articleId="articleId"  v-model="showMoreAction"></more-action>
     <!-- 频道组件 -->
-    <channel-edit :activeIndex="activeIndex" :channels="channels"  v-model="showChannelEdit"></channel-edit>
+    <channel-edit
+      :activeIndex.sync="activeIndex"
+      :channels="channels"
+        v-model="showChannelEdit"
+        ></channel-edit>
   </div>
 </template>
 
