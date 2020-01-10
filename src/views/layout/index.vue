@@ -8,9 +8,11 @@
       @click-right="$router.push('/search')"
     />
      <!-- 二级路由容器 -->
-     <div class='my-wrapper' :class="{ noTop: path === '/user' }"
->
-       <router-view ></router-view>
+     <div class='my-wrapper' :class="{ noTop: path === '/user' }">
+       <keep-alive>
+          <router-view  v-if="$route.meta.keepAlive" ></router-view>
+       </keep-alive>
+        <router-view  v-if="!$route.meta.keepAlive" ></router-view>
      </div>
      <van-tabbar  route>
         <van-tabbar-item to="/" icon="home-o">首页</van-tabbar-item>
