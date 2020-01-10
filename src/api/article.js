@@ -6,3 +6,12 @@ export function getArticles (params) {
     params: { ...params, with_top: 1 } // 因为 with_top功能没实现 但是必须传递所以在这里写死
   })
 }
+
+// 对文章不感兴趣
+export function disListArticle (data) {
+  return request({
+    url: '/article/dislikes',
+    data,
+    method: 'post'
+  })
+}

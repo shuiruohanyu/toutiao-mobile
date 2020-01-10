@@ -26,7 +26,8 @@
                     <span>{{ article.aut_name }}</span>
                     <span>{{ article.comm_count }}评论</span>
                     <span>{{ article.pubdate | relTime }}</span>
-                    <span v-if="user.token" class="close" @click.stop="openMoreAction">
+                    <!-- 定义文章的id -->
+                    <span v-if="user.token" class="close" @click.stop="openMoreAction(article.art_id.toString())">
                       <van-icon name="cross"></van-icon>
                     </span>
                   </div>
@@ -41,7 +42,8 @@
     <span class="bar_btn">
       <van-icon name="wap-nav"></van-icon>
     </span>
-    <more-action  v-model="showMoreAction"></more-action>
+    <!-- 给组件传入文章id -->
+    <more-action @on-dislikes="removeArticle" :articleId="articleId"  v-model="showMoreAction"></more-action>
   </div>
 </template>
 
@@ -56,15 +58,23 @@ export default {
       refreshSuccessText: null, // 更新成功之后的文本
       channels: [], // 定义频道数据
       activeIndex: 0, // 默认激活第一个
-      showMoreAction: false // 默认不显示
+      showMoreAction: false, // 默认不显示
+      articleId: null // 记录当前的文档id
     }
   },
   components: {
     MoreAction
   },
   methods: {
-    openMoreAction () {
+    // 因为子组件讨厌了文章 所以这里 要删除掉数据
+    removeArticle () {
+      // 获取到当前的索引
+      let index = this.activeChannel.articles.findIndex(item => item.art_id.toString() === this.articleId)
+      this.activeChannel.articles.splice(index, 1) // 移除该条数据
+    },
+    openMoreAction (artId) {
       this.showMoreAction = true // 打开遮罩层
+      this.articleId = artId // 获取点击文章的id
     },
     // 上拉加载数据
     async onLoad () {
