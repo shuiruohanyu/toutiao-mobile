@@ -16,7 +16,7 @@
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="(channel,i) in channels" :key="channel.id">
           <span @click="enterChannel(i)" class="f12" :class="{red: i === activeIndex}">{{ channel.name }}</span>
-          <van-icon v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
+          <van-icon @click="delChannel(i,channel.id)" v-if="i!==0" v-show="editing" class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { getChannels } from '@/api/channels'
+import { getChannels, delChannel } from '@/api/channels'
 export default {
   props: {
     value: {
@@ -64,6 +64,34 @@ export default {
     }
   },
   methods: {
+    // 删除频道
+    async delChannel (index, id) {
+      try {
+        await delChannel(id)
+        this.$notify({
+          type: 'success',
+          message: '操作成功'
+        })
+        // 3. 移除频道 （当前组件，父组件）
+        // 当前组件上  channels  我的频道是数组移除其中一项
+        // 当父组件传递的数据为简单数据类型的时候，不能修改，此时的修改是赋值，改变引用。
+        // 当父组件传递的数据为复杂数据类型的时候，可以修改，在保证引用不被修改的情况，修改数据。
+        // 当前组件，父组件  我的频道数据  在内存的指向是一样的
+        // 4. 有情况：
+        // 4.1 当激活的频道是最后一个频道，删除当前激活的频道， 当前激活的频道往前推一位
+        // 4.2 当前你删除的频道是当前激活频道的前面的频道，当前激活的频道往前推一位
+        // 告诉父组件删除 对应的频道
+        if (index <= this.activeIndex) {
+          this.$emit('update:activeIndex', this.activeIndex - 1)
+        }
+        this.channels.splice(index, 1)
+      } catch (error) {
+        this.$notify({
+          type: 'success',
+          message: '操作失败'
+        })
+      }
+    },
     async getChannels () {
       let data = await getChannels()
       this.allChannels = data.channels
