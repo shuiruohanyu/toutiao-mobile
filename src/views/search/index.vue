@@ -4,9 +4,8 @@
     <van-search placeholder="请输入搜索关键词" shape="round" v-model.trim="q" @search="onSearch" />
     <!-- 联想搜索 -->
     <van-cell-group class="suggest-box" v-if="q">
-      <van-cell icon="search">
-        <p>
-          <span>j</span>ava
+      <van-cell v-for="item in suggestList"  :key="item" icon="search" @click="onSearch(item.replace(`<span>${q}</span>`, q))">
+        <p v-html="item">
         </p>
       </van-cell>
     </van-cell-group>
@@ -17,9 +16,9 @@
         <van-icon name="delete" @click="clearHistory"></van-icon>
       </div>
       <van-cell-group>
-        <van-cell v-for="item in historyList" :key="item">
+        <van-cell v-for="item in historyList" :key="item" @click="onSearch(item)">
           <a class="word_btn">{{ item }}</a>
-          <van-icon @click="delHistory(item)" class="close_btn" slot="right-icon" name="cross" />
+          <van-icon @click.stop="delHistory(item)" class="close_btn" slot="right-icon" name="cross" />
         </van-cell>
       </van-cell-group>
     </div>
@@ -27,12 +26,31 @@
 </template>
 
 <script>
+import { suggest } from '@/api/article'
 const KEY = 'heima-toutiao-91-search'
 export default {
   data () {
     return {
       q: '',
-      historyList: [] // 历史记录
+      historyList: [], // 历史记录
+      suggestList: []
+    }
+  },
+  watch: {
+
+    q () {
+      // 函数防抖
+      clearTimeout(this.timer)
+      this.timer = setTimeout(async () => {
+        if (!this.q) {
+          this.suggestList = []
+          return
+        } // 如果搜索关键字不存在 不再继续
+        let data = await suggest({
+          q: this.q
+        })
+        this.suggestList = data.options.map(item => item.toLowerCase().replace(this.q, `<span>${this.q}</span>`))
+      }, 200)
     }
   },
   methods: {
@@ -53,7 +71,7 @@ export default {
       // set 对象转成 array
       // 搜索时触发  PC按下enter时 触发
       // 移动端 按下 虚拟键盘 search 时
-      this.$router.push('/search/result')
+      this.$router.push(`/search/result?q=${text}`)
     },
     // 删除历史记录
     delHistory (text) {
@@ -88,6 +106,17 @@ export default {
   .close_btn {
     margin-top: 5px;
     color: #999;
+  }
+}
+.suggest-box{
+  /deep/ .van-cell{
+    padding: 10px 20px;
+    color: #999;
+    p{
+      span{
+        color: red;
+      }
+    }
   }
 }
 </style>

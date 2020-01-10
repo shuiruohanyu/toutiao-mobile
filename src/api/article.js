@@ -23,3 +23,10 @@ export function reportArticle (data) {
     method: 'post'
   })
 }
+// 联想搜索
+export function suggest (params) {
+  return request({
+    url: '/suggestion',
+    params
+  })
+}
