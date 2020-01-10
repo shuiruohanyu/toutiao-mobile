@@ -47,6 +47,7 @@
 <script>
 import { getMyChannels } from '@/api/channels'
 import { getArticles } from '@/api/article'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
@@ -116,6 +117,7 @@ export default {
       // }, 1000)
     },
     async getMyChannel () {
+      this.channels = []
       // 数据结构 不满足 目前的结构体系 需要处理
       // 有多少个频道就应该有多少个数据
       let result = await getMyChannels()
@@ -160,7 +162,8 @@ export default {
   computed: {
     activeChannel () {
       return this.channels[this.activeIndex] // 获取当前激活的频道
-    }
+    },
+    ...mapState(['user'])
   },
   created () {
     this.getMyChannel() // 获取频道列表
@@ -170,6 +173,14 @@ export default {
     const list = this.$refs['scroll-wrapper'] // 得到的是一个滚动容器列表
     if (list) {
       list[this.activeIndex].scrollTop = this.activeChannel.scrollTop // 当前的位置
+    }
+  },
+  watch: {
+    user () {
+      //  登录之后 该user会发生变化  重置回推荐频道
+      this.activeIndex = 0
+      this.getMyChannels() // 获取我的频道
+      this.onLoad() // 重新加载数据
     }
   }
 }
