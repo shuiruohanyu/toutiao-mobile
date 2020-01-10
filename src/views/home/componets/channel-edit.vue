@@ -26,7 +26,7 @@
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="channel in optionalChannels" :key="channel.id">
           <span class="f12">{{channel.name }}</span>
-          <van-icon class="btn" name="plus"></van-icon>
+          <van-icon @click="addChannel(channel)"  class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -64,6 +64,27 @@ export default {
     }
   },
   methods: {
+    // 添加频道数据
+    addChannel (channel) {
+      // 调用封装好的Api (支持两种方式)
+      // 后端数据格式
+      // 后端：对应频道是有排序的，｛频道1，序号 3｝｛频道2，序号 1｝
+      // 后端：返回频道数据的时候，并没有返回序号，想往最后追加数据，需要知道最大序号。
+      // 采用：是覆盖式修改，在传递频道数据的同时，在前端排好序提交数据给后端
+      // 注意：后端需要的数据，不包含推荐，是默认频道 永远是第一。
+      // 数据：[{id:'频道ID',seq:1},...]
+      // 本地存储数据格式
+      // 数据：{id:'频道ID',name:'频道名称'}
+      // 需求：把两个数据合并在一起，在API中才能实现两个逻辑。
+      // 数据：[{id:'频道ID',seq:1,name:'频道名称'},....最后一个本地需要的对象]
+      const newChannels = this.channels.map((item, i) => ({
+        id: item.id,
+        name: item.name,
+        seq: i
+      }))
+      newChannels.splice(0, 1) // 删除第一个
+      newChannels.push({ ...channel, seq: newChannels.length + 1 })
+    },
     // 删除频道
     async delChannel (index, id) {
       try {
