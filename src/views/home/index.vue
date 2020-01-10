@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <van-tabs swipeable>
-      <van-tab v-for="index in 8" :title="'标签 ' + index" :key="index">
+      <van-tab v-for="channel in channels" :title="channel.name" :key="channel.id">
         <div class="scroll-wrapper">
           <!-- 另外一个下拉刷新组件 -->
           <van-pull-refresh
@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import { getMyChannels } from '@/api/channels'
 export default {
   data () {
     return {
@@ -51,11 +52,12 @@ export default {
       finished: false, // 是否已经完成加载
       articles: [], // 文章列表
       downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
-      refreshSuccessText: null // 更新成功之后的文本
+      refreshSuccessText: null, // 更新成功之后的文本
+      channels: [] // 定义频道数据
     }
   },
   methods: {
-    // 加载数据
+    // 上拉加载数据
     onLoad () {
       if (this.articles.length < 50) {
         setTimeout(() => {
@@ -72,7 +74,7 @@ export default {
         this.finished = true // 加载完毕
       }
     },
-    // 刷新方法
+    // 下拉刷新方法
     onRefresh () {
       setTimeout(() => {
         // this.$notify({ type: 'primary', message: '更新数据成功' })
@@ -89,7 +91,14 @@ export default {
           this.refreshSuccessText = '暂无更新'
         }
       }, 1000)
+    },
+    async getMyChannel () {
+      let result = await getMyChannels()
+      this.channels = result.channels
     }
+  },
+  created () {
+    this.getMyChannel() // 获取频道列表
   }
 }
 </script>
