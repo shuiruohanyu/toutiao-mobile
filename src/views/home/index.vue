@@ -43,7 +43,7 @@
       <van-icon name="wap-nav"></van-icon>
     </span>
     <!-- 给组件传入文章id -->
-    <more-action @on-dislikes="removeArticle" :articleId="articleId"  v-model="showMoreAction"></more-action>
+    <more-action @on-report="removeArticle" @on-dislikes="removeArticle" :articleId="articleId"  v-model="showMoreAction"></more-action>
   </div>
 </template>
 
@@ -198,7 +198,7 @@ export default {
     user () {
       //  登录之后 该user会发生变化  重置回推荐频道
       this.activeIndex = 0
-      this.getMyChannels() // 获取我的频道
+      this.getMyChannel() // 获取我的频道
       this.onLoad() // 重新加载数据
     }
   }

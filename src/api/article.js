@@ -15,3 +15,11 @@ export function disListArticle (data) {
     method: 'post'
   })
 }
+// 举报文章
+export function reportArticle (data) {
+  return request({
+    url: '/article/reports',
+    data,
+    method: 'post'
+  })
+}
