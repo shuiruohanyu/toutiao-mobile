@@ -36,3 +36,9 @@ export function searchArticles (params) {
     params: { ...params, 'per_page': 20 }
   })
 }
+// 获取文章详情
+export function getArticle (params) {
+  return request({
+    url: `/articles/${params.id.toString()}`
+  })
+}

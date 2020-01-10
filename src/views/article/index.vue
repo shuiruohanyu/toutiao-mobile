@@ -1,30 +1,61 @@
 <template>
- <div class='container'>
+ <div class='container'  ref="myContainer" @scroll="remeber($event)">
     <van-nav-bar fixed title="文章详情" left-arrow @click-left="$router.back()" />
     <div class="detail">
       <h3 class="title">文章的标题</h3>
       <div class="author">
-        <van-image round width="1rem" height="1rem" fit="fill" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <van-image round width="1rem" height="1rem" fit="fill" :src="article.aut_photo" />
         <div class="text">
-          <p class="name">一阵清风</p>
-          <p class="time">两周内</p>
+          <p class="name">{{ article.aut_name }}</p>
+          <p class="time">{{ article.pubdate | relTime }}</p>
         </div>
-        <van-button round size="small" type="info">+ 关注</van-button>
+        <van-button round size="small" type="info">{{ article.is_followed ? '已关注' : '+ 关注' }}</van-button>
       </div>
-      <div class="content">
-        <p>文章的内容</p>
+      <div class="content" v-html="article.content">
       </div>
       <div class="zan">
-        <van-button round size="small" class="active" plain icon="like-o">点赞</van-button>
+        <van-button round size="small" :class="{active: article.attitude === 1}" plain icon="like-o">点赞</van-button>
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <van-button round size="small" plain icon="delete">不喜欢</van-button>
+        <van-button round size="small" :class="{active: article.attitude === 0}" plain icon="delete">不喜欢</van-button>
       </div>
     </div>
   </div></template>
 
 <script>
+import { getArticle } from '@/api/article'
 export default {
-
+  data () {
+    return {
+      article: {},
+      scrollTop: 0
+    }
+  },
+  computed: {
+    articleId () {
+      return this.$route.params.id
+    }
+  },
+  methods: {
+    remeber (event) {
+      this.scrollTop = event.target.scrollTop // 记录滚动的位置
+    },
+    async getArticle () {
+      let data = await getArticle({ id: this.articleId })
+      this.article = data
+    }
+  },
+  activated () {
+    // 同一篇文章 同一个位置
+    if (this.articleId && this.article.art_id && this.article.art_id.toString() === this.articleId) {
+      this.$refs.myContainer.scrollTop = this.scrollTop // 滚回原来的位置
+    } else {
+      this.scrollTop = 0 // 重置回0
+      this.getArticle() // 获取数据 重新获取
+    }
+  },
+  created () {
+    console.log(123)
+  }
 }
 </script>
 
