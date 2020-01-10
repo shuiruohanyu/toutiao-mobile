@@ -1,8 +1,9 @@
 <template>
   <div class="container">
-    <van-tabs v-model="activeIndex"  swipeable>
+    <van-tabs :lazy-render="false" v-model="activeIndex"  swipeable   @change="changeChannel"
+>
       <van-tab v-for="channel in channels" :title="channel.name" :key="channel.id">
-        <div class="scroll-wrapper">
+        <div ref="scroll-wrapper" class="scroll-wrapper" @scroll="remember" >
           <!-- 另外一个下拉刷新组件 -->
           <van-pull-refresh
             v-model="activeChannel.downLoading"
@@ -125,8 +126,35 @@ export default {
         finished: false, // 是否已经完成加载
         articles: [], // 文章列表
         downLoading: false, // 是否下拉刷新 下拉触发  不能手动打开 但是可以手动关闭
-        timestamp: Date.now() // 默认给最新的时间
+        timestamp: Date.now(), // 默认给最新的时间
+        scrollTop: 0 // 滚动条的位置
       }))
+    },
+    changeChannel () {
+      if (this.activeChannel.articles.length) {
+        // setTimeout(() => {
+        // // 有数据时 切换到对应的滚动条位置
+        //   const list = this.$refs['scroll-wrapper'] // 得到的是一个滚动容器列表
+        //   if (list) {
+        //     list[this.activeIndex].scrollTop = this.activeChannel.scrollTop // 当前的位置
+        //   }
+        // }, 0)
+        this.$nextTick(() => {
+          // 有数据时 切换到对应的滚动条位置
+          const list = this.$refs['scroll-wrapper'] // 得到的是一个滚动容器列表
+          if (list) {
+            list[this.activeIndex].scrollTop = this.activeChannel.scrollTop // 当前的位置
+          }
+        })
+      } else {
+        this.activeChannel.upLoading = true
+        // 主动加载数据
+        this.onLoad() // 加载数据
+      }
+    },
+    // 记忆阅读的位置
+    remember (event) {
+      this.activeChannel.scrollTop = event.target.scrollTop
     }
   },
   computed: {
@@ -136,6 +164,13 @@ export default {
   },
   created () {
     this.getMyChannel() // 获取频道列表
+  },
+  activated () {
+    // 把当前激活频道的位置滚回原来的位置
+    const list = this.$refs['scroll-wrapper'] // 得到的是一个滚动容器列表
+    if (list) {
+      list[this.activeIndex].scrollTop = this.activeChannel.scrollTop // 当前的位置
+    }
   }
 }
 </script>
