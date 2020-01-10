@@ -30,3 +30,9 @@ export function suggest (params) {
     params
   })
 }
+export function searchArticles (params) {
+  return request({
+    url: '/search',
+    params: { ...params, 'per_page': 20 }
+  })
+}
