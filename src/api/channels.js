@@ -52,6 +52,37 @@ export function delChannel (id) {
     }
   })
 }
+// 添加频道数据
+export function addChannel (data) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      const { user } = store.state
+      if (user.token) {
+        // 有登录
+        await request({
+          url: '/user/channels',
+          method: 'put',
+          data
+        })
+        resolve()
+      } else {
+        // 没登录
+        // 1. 获取本地的频道
+        let { id, name } = data.channels[data.channels.length - 1]
+        let str = localStorage.getItem(CHANNELS_KEY)
+        let json = JSON.parse(str)
+        // 2. 插入添加的频道
+        json.push({ id, name })
+        // 3. 再次设置
+        localStorage.setItem(CHANNELS_KEY, JSON.stringify(json))
+        // 4. 成功执行
+        resolve()
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 // 获取所有频道
 
 export function getChannels () {
