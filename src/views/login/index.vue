@@ -63,6 +63,8 @@ export default {
           const data = await login(this.loginForm)
           this.$notify({ type: 'success', message: '登录成功' })
           this.updateUser({ user: data }) // 通过vuex更新数据 并写入缓存
+          let { redirect } = this.$route.query
+          this.$router.push(redirect || '/') // 跳转到要跳的地址或者主页
         } catch (error) {
           this.$notify({ type: 'danger', message: '登录失败' })
         }
